@@ -5,7 +5,7 @@ CLEAN=${1:-'noclean'}
 IMG_FILE=ed2.img
 
 # Max size in MB
-IMG_MAXSIZE=2048
+IMG_MAXSIZE=1024
 
 # Bootstrap definition file
 BOOTSTRAP_FILE=ed2_docker
