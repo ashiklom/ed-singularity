@@ -25,7 +25,7 @@ if [ ! -f $IMG_FILE ]; then
     sudo singularity create --size $IMG_MAXSIZE $IMG_FILE
 fi
 
-# Bootstrap image
+echo "Boostrapping image"
 sudo singularity bootstrap $IMG_FILE $BOOTSTRAP_FILE
 
 # For more info on singularity commands, see http://singularity.lbl.gov/docs-usage

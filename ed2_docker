@@ -79,6 +79,8 @@ From: ubuntu:trusty
     echo "This could be your test!"
     echo "This could be another test!"
     /ED2/ED/build/ed_2.1-dbg
+    echo "The above command should have failed, but with an ED error (missing ED2IN)." \
+        "If not, then something went wrong with the installation"
 
 # This is the script that is run when the image is 
 # executed, either with `./ed2.img <args>` or with 
