@@ -1,0 +1,90 @@
+# Note that you do not actually have to have Docker installed for this to work
+# This bootstrap just pulls from the Docker library
+
+Bootstrap: docker
+From: ubuntu:trusty
+
+# See https://hub.docker.com/ for more base images that can 
+# be used instead of ubuntu:trusty
+
+# AFAIK, all of the blocks below use `sh` shell, NOT bash, 
+# so make sure the commands are POSIX-compliant
+
+# This block is run on the host (not the image), before the 
+# image is built
+%setup
+    echo "Starting the Ubuntu container"
+    echo "Root FS: $SINGULARITY_ROOTFS"
+
+# This block is run inside the image. Note that unlike 
+# Docker, this entire block is run every time `bootstrap` is 
+# called. However, because it runs on an existing image 
+# (like a VM), commands like `apt-get install` will not take 
+# long the second time since the packages are already 
+# installed.
+%post
+    # This is required for sgml-base package to install
+    OLDPATH=$PATH
+    PATH=/usr/sbin:$PATH
+
+    # Add 'universe' to apt sources -- that's where the hdf5 libraries live
+    sed -i 's/main restricted$/main restricted universe/' /etc/apt/sources.list
+
+    echo "Updating package cache"
+    apt-get update
+
+    echo "Installing packages"
+    apt-get -y install \
+        gfortran \
+        git \
+        libhdf5-openmpi-dev \
+        libopenmpi-dev \
+        make \
+        openmpi-bin
+
+    # Reset PATH to not break anything
+    PATH=$OLDPATH
+
+    # The image starts in the root (`\`) directory
+    echo "Starting in directory: $(pwd)"
+
+    if [ ! -d /ED2 ]; then
+        echo "Cloning ED2 repository"
+        # Note the use of the `git:` protocol, not https.
+        # This is less secure, but avoids the need for CA 
+        # certificate authentication, which requires more 
+        # packages to be installed.
+        git clone git://github.com/ashiklom/ED2.git /ED2
+        cd /ED2
+    else
+        echo "ED2 directory already exists. Pulling in changes."
+        cd /ED2
+        # Pull all branches tracking remotes
+        git pull --all
+    fi
+
+    echo "Installing ED2, branch 'docker'"
+    git checkout docker
+    cd ED/build
+    ./install.sh -k A -p ubuntu_trusty --gitoff
+    echo "Done installing ED2. Executable in location: $(pwd -P)"
+
+    cd /
+    echo "Ended in directory: $(pwd)"
+    exit 0
+
+# This block is run at the end of any bootstrap. It's a good 
+# place to put unit tests.
+%test
+    echo "This could be your test!"
+    echo "This could be another test!"
+    /ED2/ED/build/ed_2.1-dbg
+
+# This is the script that is run when the image is 
+# executed, either with `./ed2.img <args>` or with 
+# `singularity run ed2.img <args>`. Note the use of the `$*` 
+# to pass all arguments from image execution into here. 
+# Because this is just a script, more sophisticated argument 
+# parsing is possible.
+%runscript
+    /ED2/ED/build/ed_2.1-dbg $*
