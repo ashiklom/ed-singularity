@@ -41,35 +41,30 @@ From: ubuntu:trusty
         make \
         wget
 
-    #echo "Installing OpenMPI"
-    #wget "https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz"
-    #tar -zxvf openmpi-3.0.0.tar.gz
-    #cd openmpi-3.0.0
-    #./configure
-    #make
-    #make install
-    #cd ..
-    #echo "Done!"
+    echo "Installing OpenMPI"
+    wget "https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz"
+    tar -zxvf openmpi-3.0.0.tar.gz
+    cd openmpi-3.0.0
+    ./configure
+    make
+    make install
+    cd ..
+    echo "Done!"
 
-    #echo "Installing HDF5"
-    #wget "https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.10.1.tar.gz"
-    #tar -zxvf hdf5-1.10.1.tar.gz
-    #cd hdf5-1.10.1
-    #./configure \
-        #FC="mpif90" \
-        #F9X="mpif90" \
-        #RUNPARALLEL="mpirun" \
-        #--enable-fortran \
-        #--enable-parallel
-    #make
-    #make install
-    #cd ..
-    #echo "Done!"
-
-    apt-get -y install \
-        openmpi-bin \
-        libopenmpi-dev \
-        libhdf5-openmpi-dev
+    echo "Installing HDF5"
+    wget "https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.10.1.tar.gz"
+    tar -zxvf hdf5-1.10.1.tar.gz
+    cd hdf5-1.10.1
+    ./configure \
+        FC="mpif90" \
+        F9X="mpif90" \
+        RUNPARALLEL="mpirun" \
+        --enable-fortran \
+        --enable-parallel
+    make
+    make install
+    cd ..
+    echo "Done!"
 
     # Reset PATH to not break anything
     PATH=$OLDPATH
