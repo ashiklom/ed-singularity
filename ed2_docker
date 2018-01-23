@@ -33,14 +33,43 @@ From: ubuntu:trusty
     echo "Updating package cache"
     apt-get update
 
-    echo "Installing packages"
+    echo "Installing base packages"
     apt-get -y install \
+        build-essential \
         gfortran \
         git \
-        libhdf5-openmpi-dev \
-        libopenmpi-dev \
         make \
-        openmpi-bin
+        wget
+
+    #echo "Installing OpenMPI"
+    #wget "https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz"
+    #tar -zxvf openmpi-3.0.0.tar.gz
+    #cd openmpi-3.0.0
+    #./configure
+    #make
+    #make install
+    #cd ..
+    #echo "Done!"
+
+    #echo "Installing HDF5"
+    #wget "https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.10.1.tar.gz"
+    #tar -zxvf hdf5-1.10.1.tar.gz
+    #cd hdf5-1.10.1
+    #./configure \
+        #FC="mpif90" \
+        #F9X="mpif90" \
+        #RUNPARALLEL="mpirun" \
+        #--enable-fortran \
+        #--enable-parallel
+    #make
+    #make install
+    #cd ..
+    #echo "Done!"
+
+    apt-get -y install \
+        openmpi-bin \
+        libopenmpi-dev \
+        libhdf5-openmpi-dev
 
     # Reset PATH to not break anything
     PATH=$OLDPATH
@@ -63,11 +92,20 @@ From: ubuntu:trusty
         git pull --all
     fi
 
+    # Install ED2
     echo "Installing ED2, branch 'docker'"
     git checkout docker
     cd ED/build
-    ./install.sh -k A -p ubuntu_trusty --gitoff
+    ./install.sh -k A -p ubuntu_trusty -g
     echo "Done installing ED2. Executable in location: $(pwd -P)"
+
+    # Install EDR
+    cd ../..        # Back to ED root directory
+    echo "Currently in directory: $(pwd)"
+    echo "Installing EDR, branch 'docker'"
+    cd EDR/build
+    ./install.sh -k A -p ubuntu_trusty -g
+    echo "Done installing EDR. Executable in location: $(pwd -P)"
 
     cd /
     echo "Ended in directory: $(pwd)"
@@ -89,4 +127,18 @@ From: ubuntu:trusty
 # Because this is just a script, more sophisticated argument 
 # parsing is possible.
 %runscript
-    /ED2/ED/build/ed_2.1-dbg $*
+    if [ $1 == "ed" ]; then
+        echo "============================"
+        echo "Running ED2"
+        echo "============================"
+        /ED2/ED/build/ed_2.1-dbg ${@:2}
+    else if [ $1 == "edr" ]; then
+        echo "============================"
+        echo "Running EDR"
+        echo "============================"
+        /ED2/EDR/build/ed_2.1-dbg ${@:2}
+    else
+        echo "Unknown argument $1. Please use 'ed' or 'edr'."
+    fi
+    echo "Done"
+
